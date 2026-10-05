@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:CalculateurAge.ViewModels"
              x:Class="CalculateurAge.MainPage"
+             x:DataType="vm:CalculateurViewModel"
              Title="Calculateur">
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
             <Label Text="Nom" FontSize="16"/>
-            <Entry x:Name="entryNom" Placeholder="Votre nom"/>
+            <Entry Text="{Binding Nom, Mode=TwoWay}"
+                   Placeholder="Votre nom"/>
             <Label Text="Date de naissance" FontSize="16"/>
-            <DatePicker x:Name="pickerDate"/>
-            <Button x:Name="btnCalculer" Text="Calculer"
-                    Clicked="OnCalculerClicked"/>
+            <DatePicker Date="{Binding DateNaissance}"/>
+            <Button Text="Calculer"
+                    Command="{Binding CalculerCommand}"/>
+            <Label Text="{Binding Resultat}" FontSize="20"
+                   IsVisible="{Binding ResultatVisible}"/>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
