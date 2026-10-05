@@ -1,4 +1,6 @@
+using System.Collections.ObjectModel;
 using CalculateurAge.Models;
+using CalculateurAge.Views;
 
 namespace CalculateurAge.ViewModels;
 
@@ -12,6 +14,8 @@ public class CalculateurViewModel : BaseViewModel
     private string _resultat = "";
     private bool _resultatVisible;
     private string _statut = "";
+    private string _prochainAnniversaire = "";
+    private Calcul? _dernierCalcul;
 
     // ---------- Propriétés publiques : ce que le XAML voit ----------
     public string Nom
@@ -56,9 +60,21 @@ public class CalculateurViewModel : BaseViewModel
         set => SetField(ref _statut, value);
     }
 
+    // "Prochain anniversaire dans X jour(s)" ou "Joyeux anniversaire !".
+    public string ProchainAnniversaire
+    {
+        get => _prochainAnniversaire;
+        set => SetField(ref _prochainAnniversaire, value);
+    }
+
+    // Historique : ObservableCollection notifie seule les ajouts et suppressions.
+    public ObservableCollection<Calcul> Historique { get; } = new();
+
     // ---------- Commandes ----------
     public RelayCommand CalculerCommand { get; }
     public RelayCommand EffacerCommand { get; }
+    public RelayCommand VoirDetailCommand { get; }
+    public RelayCommand ViderHistoriqueCommand { get; }
 
     public CalculateurViewModel()
     {
@@ -71,6 +87,15 @@ public class CalculateurViewModel : BaseViewModel
         EffacerCommand = new RelayCommand(
             Effacer,
             () => !string.IsNullOrWhiteSpace(Nom) || ResultatVisible);
+
+        // Possible seulement s'il existe un calcul à détailler.
+        VoirDetailCommand = new RelayCommand(
+            async () => await VoirDetail(),
+            () => _dernierCalcul is not null);
+
+        ViderHistoriqueCommand = new RelayCommand(
+            ViderHistorique,
+            () => Historique.Count > 0);
     }
 
     // ---------- Logique métier ----------
@@ -92,7 +117,13 @@ public class CalculateurViewModel : BaseViewModel
 
         Resultat = $"{calcul.Nom}, vous avez {calcul.Age} ans";
         Statut = calcul.Statut;
+        ProchainAnniversaire = jours == 0
+            ? "Joyeux anniversaire !"
+            : $"Prochain anniversaire dans {jours} jour(s)";
         ResultatVisible = true;
+
+        _dernierCalcul = calcul;
+        Historique.Insert(0, calcul);   // le plus récent en haut
         RafraichirCommandes();
     }
 
@@ -103,9 +134,22 @@ public class CalculateurViewModel : BaseViewModel
         DateNaissance = DateTime.Today.AddYears(-20);
         Resultat = "";
         Statut = "";
+        ProchainAnniversaire = "";
         ResultatVisible = false;
+        _dernierCalcul = null;
         RafraichirCommandes();
     }
+
+    private void ViderHistorique()
+    {
+        Historique.Clear();
+        RafraichirCommandes();
+    }
+
+    // Le résultat part vers ResultatPage comme OBJET, pas comme texte dans l'URL.
+    private Task VoirDetail()
+        => Shell.Current.GoToAsync(nameof(ResultatPage),
+               new Dictionary<string, object> { ["Calcul"] = _dernierCalcul! });
 
     // Après chaque changement d'état, toutes les commandes reposent
     // la question « suis-je exécutable ? ».
@@ -114,5 +158,7 @@ public class CalculateurViewModel : BaseViewModel
     {
         CalculerCommand?.Rafraichir();
         EffacerCommand?.Rafraichir();
+        VoirDetailCommand?.Rafraichir();
+        ViderHistoriqueCommand?.Rafraichir();
     }
 }
