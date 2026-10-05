@@ -10,12 +10,26 @@
             <Label Text="Nom" FontSize="16"/>
             <Entry Text="{Binding Nom, Mode=TwoWay}"
                    Placeholder="Votre nom"/>
+
             <Label Text="Date de naissance" FontSize="16"/>
             <DatePicker Date="{Binding DateNaissance}"/>
-            <Button Text="Calculer"
-                    Command="{Binding CalculerCommand}"/>
-            <Label Text="{Binding Resultat}" FontSize="20"
-                   IsVisible="{Binding ResultatVisible}"/>
+            <Label Text="La date de naissance ne peut pas être dans le futur."
+                   TextColor="Red"
+                   IsVisible="{Binding DateInvalide}"/>
+
+            <HorizontalStackLayout Spacing="10">
+                <Button Text="Calculer"
+                        Command="{Binding CalculerCommand}"/>
+                <Button Text="Effacer"
+                        Command="{Binding EffacerCommand}"/>
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout Spacing="6"
+                                 IsVisible="{Binding ResultatVisible}">
+                <Label Text="{Binding Resultat}" FontSize="20"/>
+                <Label Text="{Binding Statut}" FontSize="16"
+                       FontAttributes="Bold"/>
+            </VerticalStackLayout>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
