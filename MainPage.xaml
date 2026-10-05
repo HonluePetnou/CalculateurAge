@@ -11,8 +11,6 @@
             <DatePicker x:Name="pickerDate"/>
             <Button x:Name="btnCalculer" Text="Calculer"
                     Clicked="OnCalculerClicked"/>
-            <Label x:Name="lblResultat" FontSize="20"
-                   IsVisible="False"/>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
